@@ -9,6 +9,22 @@ struct treeNode
     long size = 0;
 };
 
+// post-order traversal of tree
+int traverse(treeNode *node, vector<int> *sizes)
+{
+    int size = node->size;
+
+    // add total size of all children to current node
+    for (pair<string, treeNode *> element : node->children)
+    {
+        size += traverse(element.second, sizes);
+    }
+
+    // store current size in vector
+    sizes->push_back(size);
+    return size;
+}
+
 int main()
 {
     // init tree
@@ -69,5 +85,19 @@ int main()
         }
     }
 
-    cout << root.size << endl;
+    // traverse tree
+    vector<int> sizes;
+    int sum = 0;
+    traverse(&root, &sizes);
+
+    // find sum of directories with total size <= 100000
+    for (int i : sizes)
+    {
+        if (i <= 100000)
+        {
+            sum += i;
+        }
+    }
+
+    cout << sum << endl;
 }

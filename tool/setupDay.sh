@@ -28,4 +28,7 @@ curl "https://adventofcode.com/2022/day/${DAY}/input" \
   --compressed --silent --output "../day${DAY}/input" 
   
 echo -e '#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    \n}' > "../day${DAY}/sol1.cpp"
+
+code "../day${DAY}"
+
 echo "Done!"

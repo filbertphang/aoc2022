@@ -5,7 +5,7 @@ YEAR=2022
 DIRNAME=$( dirname -- "$0"; )
 
 echo "Setting up files for Advent of Code ${YEAR}: Day ${DAY}..."
-echo $DIRNAME
+cd "$DIRNAME"
 mkdir "../day${DAY}"
 
 curl "https://adventofcode.com/2022/day/${DAY}/input" \

@@ -15,7 +15,7 @@ int main()
         {
             sum += current * value;
             target += 40;
-            cout << "cycle " << current << ": " << value << endl;
+            // cout << "cycle " << current << ": " << value << endl;
         }
         if (!skip)
         {

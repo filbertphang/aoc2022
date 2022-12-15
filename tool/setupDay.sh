@@ -8,7 +8,7 @@ echo "Setting up files for Advent of Code ${YEAR}: Day ${DAY}..."
 cd "$DIRNAME"
 mkdir "../day${DAY}"
 
-curl "https://adventofcode.com/2022/day/${DAY}/input" \
+curl "https://adventofcode.com/${YEAR}/day/${DAY}/input" \
   -H 'authority: adventofcode.com' \
   -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
   -H 'accept-language: en-GB-oxendict,en;q=0.9' \

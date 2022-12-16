@@ -13,7 +13,8 @@ int find_max_pressure(int time, int pos, string opened, int dist[60][60]);
 // ... right?
 int n_valves;
 int n_useful;
-map<string, int> memo[30];
+const int STEPS = 30;
+map<string, int> memo[STEPS];
 map<string, int> valve_ids;
 vector<valve> valves;
 vector<int> useful_valve_ids;
@@ -137,7 +138,7 @@ int find_max_pressure(int time, int pos, string opened, int dist[60][60])
                 // check if we can open it without exceeding the time limit
                 int next_id = useful_valve_ids[next];
                 int next_time = time + dist[pos][next_id] + 1;
-                if (next_time >= 30)
+                if (next_time >= STEPS)
                 {
                     continue;
                 }
@@ -146,7 +147,7 @@ int find_max_pressure(int time, int pos, string opened, int dist[60][60])
                 {
                     // compute total pressure released by opening that valve next
                     valve next_valve = valves[next_id];
-                    int next_pressure = (30 - next_time) * next_valve.rate;
+                    int next_pressure = (STEPS - next_time) * next_valve.rate;
 
                     // update the bitstring since this valve is now open
                     string *next_opened = new string(opened);
@@ -157,6 +158,8 @@ int find_max_pressure(int time, int pos, string opened, int dist[60][60])
                 }
             }
         }
+        // memoize result and return
+        memo[time][opened] = max_pressure;
         return max_pressure;
     }
 }

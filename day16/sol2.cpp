@@ -13,12 +13,13 @@ void find_max_pressure(int time, int pos, string opened, int dist[60][60]);
 // ... right?
 int n_valves;
 int n_useful;
-const int STEPS = 26;
+const int STEPS = 30;
 map<string, int> memo[STEPS];
 map<string, int> valve_ids;
 vector<valve> valves;
 vector<int> useful_valve_ids;
 int dist[60][60] = {0}; // hard-coded to be 60x60
+string all_opened = "";
 
 bool cmp(pair<string, int> &a, pair<string, int> &b)
 {
@@ -107,6 +108,7 @@ int main()
     for (int x = 0; x < n_useful; x++)
     {
         init += "0";
+        all_opened += "1";
     }
 
     /*
@@ -135,7 +137,7 @@ int main()
     // compute sums of non-intersecting valve-opening patterns
     // as a heuristic, limit to the top 15 patterns
     int max_sum = 0;
-    for (int n = 0; n < 15; n++)
+    for (int n = 0; n < last.size(); n++)
     {
         int cur_sum = last[n].second;
         bitset<16> first_bits(last[n].first);
@@ -153,7 +155,12 @@ int main()
         }
     }
 
-    cout << max_sum << endl;
+    // cout << max_sum << endl;
+    const int y = 22;
+    for (auto u : memo[y])
+    {
+        cout << u.first << ": " << u.second << endl;
+    }
 }
 
 // recursive bottom-up DP function
@@ -209,8 +216,21 @@ void find_max_pressure(int time, int pos, string opened, int dist[60][60])
                 }
                 memo[next_time][*next_opened] = max(memo[next_time][*next_opened], next_pressure);
 
-                // recursively fill in memo table
-                find_max_pressure(next_time, next_id, *next_opened, dist);
+                // if all valves are opened, update value at 26 minutes
+                // no more recursive calls needed
+                if (*next_opened == all_opened)
+                {
+                    if (memo[STEPS - 1].count(all_opened) != 1)
+                    {
+                        memo[STEPS - 1][all_opened] = 0;
+                    }
+                    memo[STEPS - 1][all_opened] = memo[next_time][*next_opened];
+                }
+                // else, recursively fill in memo table
+                else
+                {
+                    find_max_pressure(next_time, next_id, *next_opened, dist);
+                }
             }
         }
     }

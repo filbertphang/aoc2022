@@ -19,6 +19,7 @@ map<string, int> valve_ids;
 vector<valve> valves;
 vector<int> useful_valve_ids;
 int dist[60][60] = {0}; // hard-coded to be 60x60
+string all_opened;
 
 int main()
 {
@@ -102,8 +103,13 @@ int main()
     for (int x = 0; x < n_useful; x++)
     {
         init += "0";
+        all_opened += "1";
     }
 
+    for (auto u : valve_ids)
+    {
+        cout << "valve " << u.first << " has id " << u.second << endl;
+    }
     // find max pressure
     int max_pres = find_max_pressure(0, valve_ids["AA"], init, dist);
     cout << max_pres << endl;
@@ -119,6 +125,10 @@ int find_max_pressure(int time, int pos, string opened, int dist[60][60])
     if (memo[time].count(opened) == 1)
     {
         return memo[time][opened];
+    }
+    else if (opened == all_opened)
+    {
+        return 0;
     }
     // otherwise, compute solution to this subproblem
     else
@@ -159,6 +169,10 @@ int find_max_pressure(int time, int pos, string opened, int dist[60][60])
             }
         }
         // memoize result and return
+        if (memo[time].count(opened) != 1)
+        {
+            memo[time][opened] = 0;
+        }
         memo[time][opened] = max_pressure;
         return max_pressure;
     }

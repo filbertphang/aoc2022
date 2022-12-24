@@ -1,6 +1,6 @@
 # Advent of Code 2022
 
-My solutions for AoC 2022. Problem analysis and solutions walkthrough can be found on my blog.
+My solutions for AoC 2022. Problem analysis and solutions walkthrough can be found on [my blog](https://filbertphang.github.io/2022/12/15/aoc-2022-intro.html) (although I am very behind on writing these :<).
 
 Solutions are written in C++, with the exception of day 13, which is written in Python (`ast.literal_eval()` was too tempting!).
 

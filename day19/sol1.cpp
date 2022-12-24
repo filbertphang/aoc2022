@@ -6,13 +6,50 @@ const int N = 30;
 
 // for each blueprint:
 // columns: [ore, clay, obsidian, geode] costs for that robot
-// rows: [ore, clay, obsidian geode] robot schematics
-int bp[N + 1][4][4];
+// rows: [ore, clay, obsidian] robot schematics
+int bp[N + 1][4][3];
+int max_ore;
+int max_clay;
+int max_obs;
 
 // resources: [ore, clay, obsidian, geode]
 // robots: [ore, clay, obsidian, geode]
 int simulate(int id, int time, int next, int ore, int clay, int obs, int geo, int ore_r, int clay_r, int obs_r, int geo_r)
 {
+
+    // decide to build a robot or not
+    int robot_built = -1;
+
+    // build ore robot next
+    if (next == 0 && ore >= bp[id][0][0])
+    {
+        robot_built = 0;
+        ore -= bp[id][0][0];
+    }
+
+    // build clay robot next
+    else if (next == 1 && ore >= bp[id][1][0])
+    {
+        robot_built = 1;
+        ore -= bp[id][1][0];
+    }
+
+    // build obsidian robot next
+    else if (next == 2 && ore >= bp[id][2][0] && clay >= bp[id][2][1])
+    {
+        robot_built = 2;
+        ore -= bp[id][2][0];
+        clay -= bp[id][2][1];
+    }
+
+    // build geode robot next
+    else if (next == 3 && ore >= bp[id][3][0] && obs >= bp[id][3][2])
+    {
+        robot_built = 3;
+        ore -= bp[id][3][0];
+        obs -= bp[id][3][2];
+    }
+
     // collect new resources
     ore += ore_r;
     clay += clay_r;
@@ -25,52 +62,52 @@ int simulate(int id, int time, int next, int ore, int clay, int obs, int geo, in
         return geo;
     }
 
-    bool robot_built = false;
-
-    // build ore robot next
-    if (next == 0 && ore >= bp[id][0][0])
-    {
-        robot_built = true;
-        ore -= bp[id][0][0];
-        ore_r += 1;
-    }
-
-    // build clay robot next
-    else if (next == 1 && ore >= bp[id][1][0])
-    {
-        robot_built = true;
-        ore -= bp[id][1][0];
-        clay_r += 1;
-    }
-
-    // build obsidian robot next
-    else if (next == 2 && ore >= bp[id][2][0] && clay >= bp[id][2][1])
-    {
-        robot_built = true;
-        ore -= bp[id][2][0];
-        clay -= bp[id][2][1];
-        obs_r += 1;
-    }
-
-    // build geode robot next
-    else if (next == 3 && ore >= bp[id][3][0] && obs >= bp[id][3][2])
-    {
-        robot_built = true;
-        ore -= bp[id][3][0];
-        obs -= bp[id][3][2];
-        geo_r += 1;
-    }
-
     // we built a robot, see which robot to build next
-    if (robot_built)
+    if (robot_built != -1)
     {
-        printf("%d: %d %d %d %d / %d %d %d %d\n", time, ore, clay, obs, geo, ore_r, clay_r, obs_r, geo_r);
+        if (robot_built == 0)
+        {
+            ore_r += 1;
+        }
+        else if (robot_built == 1)
+        {
+            clay_r += 1;
+        }
+        else if (robot_built == 2)
+        {
+            obs_r += 1;
+        }
+        else if (robot_built == 3)
+        {
+            geo_r += 1;
+        }
+
+        // check if the current resource values are sufficient
+        // to produce robots for all future time stamps
+        // if so, we no longer need to produce more of those robots
+        bool enough_ore = (ore / max_ore) > (TIME - time);
+        bool enough_clay = (clay / max_clay) > (TIME - time);
+        bool enough_obs = (obs / max_obs) > (TIME - time);
+
         // [build ore next, build clay next, build obs next, build geo next]
         int options[4] = {0, 0, 0, 0};
-        options[0] = simulate(id, time + 1, 0, ore, clay, obs, geo, ore_r, clay_r, obs_r, geo_r);
-        options[1] = simulate(id, time + 1, 1, ore, clay, obs, geo, ore_r, clay_r, obs_r, geo_r);
 
-        if (clay_r > 0)
+        // also, since we can only produce one robot every turn
+        // if the maximum ore cost for any robot is x, we do not need to have
+        // more than x ore robots. likewise for the other materials
+        // these optimizations reduce the search space sufficiently so we can
+        // solve for the correct answer in a reasonable time
+        if (ore_r < max_ore && !enough_ore)
+        {
+            options[0] = simulate(id, time + 1, 0, ore, clay, obs, geo, ore_r, clay_r, obs_r, geo_r);
+        }
+
+        if (clay_r < max_clay && !enough_clay)
+        {
+            options[1] = simulate(id, time + 1, 1, ore, clay, obs, geo, ore_r, clay_r, obs_r, geo_r);
+        }
+
+        if (clay_r > 0 && obs_r < max_obs && !enough_obs)
         {
             options[2] = simulate(id, time + 1, 2, ore, clay, obs, geo, ore_r, clay_r, obs_r, geo_r);
         }
@@ -96,7 +133,7 @@ int main()
     {
         for (int j = 0; j < 4; j++)
         {
-            for (int k = 0; k < 4; k++)
+            for (int k = 0; k < 3; k++)
             {
                 bp[i][j][k] = 0;
             }
@@ -123,20 +160,22 @@ int main()
         bp[id][3][2] = stoi(*num_match);
     }
 
-    int geo[N + 1] = {0};
+    int quality = 0;
     for (int id = 1; id < N + 1; id++)
     {
+        // determine maximum resource costs for any robot for that blueprint
+        max_ore = max(bp[id][0][0], max(bp[id][1][0], max(bp[id][2][0], bp[id][3][0])));
+        max_clay = bp[id][2][1];
+        max_obs = bp[id][3][2];
+
+        // simulate blueprint. we can start by building an ore robot or a clay robot
         cout << "simulating blueprint: " << id << endl;
         int start_ore = simulate(id, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0);
-        ;
         int start_clay = simulate(id, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0);
-        geo[id] = max(start_ore, start_clay);
+
+        // compute quality of blueprint
+        quality += (id * max(start_ore, start_clay));
     }
 
-    // int max_geodes = *max_element(begin(geo), end(geo));
-    // cout << max_geodes << endl;
-    for (int idd = 1; idd < N + 1; idd++)
-    {
-        cout << idd << ": " << geo[idd] << "\n";
-    }
+    cout << quality << "\n";
 }

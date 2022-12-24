@@ -22,6 +22,7 @@ int main()
 
     while (cin >> line[0] >> line[1] >> line[2])
     {
+        // find elements used in each of the 3 rucksacks
         int items[3][53] = {};
         for (int i = 0; i < 3; i++)
         {
@@ -31,6 +32,7 @@ int main()
                 items[i][prio] += 1;
             }
         }
+        // find item that is used in all 3 rucksacks
         for (int k = 1; k < 53; k++)
         {
             if (items[0][k] > 0 && items[1][k] > 0 && items[2][k] > 0)

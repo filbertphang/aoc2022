@@ -50,7 +50,7 @@ long yell(string name)
         mk.val = result;
         return result;
     }
-};
+}
 
 int main()
 {

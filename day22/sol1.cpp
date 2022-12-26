@@ -69,12 +69,111 @@ int main()
     cin >> line;
     regex_token_iterator<string::iterator> num_match(line.begin(), line.end(), num_pattern);
     regex_token_iterator<string::iterator> dir_match(line.begin(), line.end(), dir_pattern);
-    while (num_match != rend)
-    {
-        steps.push(stoi(*num_match++));
-    }
     while (dir_match != rend)
     {
-        dir.push(*(dir_match++));
+        string tmp = *(dir_match++);
+        dir.push(tmp);
     }
+    while (num_match != rend)
+    {
+        string tmp = *(num_match++);
+        steps.push(stoi(tmp));
+    }
+
+    // traverse the grove!
+    int x = rows[0].first;
+    int y = 0;
+    int d = 0;
+
+    while (!steps.empty())
+    {
+        // cout << " current position: (" << x << ", " << y << "). \n";
+        int step = steps.front();
+        steps.pop();
+
+        int new_x = x;
+        int new_y = y;
+
+        // move forward x steps
+        for (int i = 0; i < step; i++)
+        {
+            // current direction:
+            // 0: right
+            // 1: down
+            // 2: left
+            // 3: up
+
+            // get next position
+            if (d == 0)
+            {
+                new_x += 1;
+                if (new_x > rows[y].second)
+                {
+                    new_x = rows[y].first;
+                }
+            }
+            else if (d == 1)
+            {
+                new_y += 1;
+                if (new_y > cols[x].second)
+                {
+                    new_y = cols[x].first;
+                }
+            }
+            else if (d == 2)
+            {
+                new_x -= 1;
+                if (new_x < rows[y].first)
+                {
+                    new_x = rows[y].second;
+                }
+            }
+            else if (d == 3)
+            {
+                new_y -= 1;
+                if (new_y < cols[x].first)
+                {
+                    new_y = cols[x].second;
+                }
+            }
+
+            // check if there is a wall in the way
+            if (walls[new_x][new_y] == '#')
+            {
+                // cout << "ran into a wall at: (" << new_x << ", " << new_y << "). \n";
+                break;
+            }
+            else
+            {
+                x = new_x;
+                y = new_y;
+            }
+        }
+
+        // change direction
+        if (!dir.empty())
+        {
+            string next_d = dir.front();
+            dir.pop();
+
+            if (next_d == "L")
+            {
+                d -= 1;
+                if (d < 0)
+                {
+                    d = 3;
+                }
+            }
+            else
+            {
+                d = (d + 1) % 4;
+            }
+        }
+    }
+
+    cout << "final x: " << x << "\n";
+    cout << "final y: " << y << "\n";
+    cout << "final d: " << d << "\n";
+    int password = (x + 1) * 4 + (y + 1) * 1000 + d;
+    cout << "password: " << password << "\n";
 }

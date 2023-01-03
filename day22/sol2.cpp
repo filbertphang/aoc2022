@@ -1,69 +1,76 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+const int SIZE = 50;
+
 struct Face
 {
     // <direction, orientation>
     // orientation of the next face is given in terms
     // of # right rotations away from "up"
-    pair<int, int> left;
-    pair<int, int> right;
-    pair<int, int> up;
-    pair<int, int> down;
-    char grid[50][50];
+    pair<int, int> dirs[4];
+    char grid[SIZE][SIZE];
+    int top;
+    int left;
 };
 
-void cp_grid(char src[50][50], char tar[50][50])
+void print_grid(char arr[SIZE][SIZE])
 {
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < SIZE; i++)
     {
-        for (int j = 0; j < 50; j++)
+        for (int j = 0; j < SIZE; j++)
+        {
+            cout << arr[i][j];
+        }
+        cout << '\n';
+    }
+}
+
+void cp_grid(char src[SIZE][SIZE], char tar[SIZE][SIZE])
+{
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
         {
             tar[i][j] = src[i][j];
         }
     }
 }
 
-void rotate_grid(char grid[50][50], int times)
+pair<int, int> rotate_coords(pair<int, int> coords, int times)
 {
-    char orig[50][50];
-    cp_grid(grid, orig);
-    for (int i = 0; i < 50; i++)
+    if (times <= 0)
     {
-        for (int j = 0; j < 50; j++)
-        {
-            grid[j][49 - i] = orig[i][j];
-        }
+        return coords;
     }
-    times -= 1;
-    if (times > 0)
-    {
-        rotate_grid(grid, times);
-    }
+    pair<int, int> result;
+    result.first = coords.second;
+    result.second = SIZE - 1 - coords.first;
+    return rotate_coords(result, times - 1);
 }
 
 // get the current cube face
 int get_face(int x, int y)
 {
-    if (x >= 0 && x < 50)
+    if (x >= 0 && x < SIZE)
     {
         return 2;
     }
-    else if (x >= 50 && x < 100)
+    else if (x >= SIZE && x < 2 * SIZE)
     {
         return 3;
     }
-    else if (x >= 100 && x < 150)
+    else if (x >= 2 * SIZE && x < 3 * SIZE)
     {
-        if (y >= 0 && y < 50)
+        if (y >= 0 && y < SIZE)
         {
             return 1;
         }
-        else if (y >= 50 && y < 100)
+        else if (y >= SIZE && y < 2 * SIZE)
         {
             return 4;
         }
-        else if (y >= 100 && y < 150)
+        else if (y >= 2 * SIZE && y < 3 * SIZE)
         {
             return 5;
         }
@@ -86,86 +93,98 @@ int main()
     // hard-code directions (sadly)
     {
         // face 1
-        faces[1].left = pair<int, int>(4, 2);
-        faces[1].right = pair<int, int>(2, 0);
-        faces[1].up = pair<int, int>(6, 3);
-        faces[1].down = pair<int, int>(3, 0);
+        faces[1].dirs[0] = pair<int, int>(2, 0);
+        faces[1].dirs[1] = pair<int, int>(3, 0);
+        faces[1].dirs[2] = pair<int, int>(4, 2);
+        faces[1].dirs[3] = pair<int, int>(6, 3);
+        faces[1].top = 0;
+        faces[1].left = SIZE;
 
         // face 2
-        faces[2].left = pair<int, int>(1, 0);
-        faces[2].right = pair<int, int>(5, 2);
-        faces[2].up = pair<int, int>(6, 0);
-        faces[2].down = pair<int, int>(3, 3);
+        faces[2].dirs[0] = pair<int, int>(5, 2);
+        faces[2].dirs[1] = pair<int, int>(3, 3);
+        faces[2].dirs[2] = pair<int, int>(1, 0);
+        faces[2].dirs[3] = pair<int, int>(6, 0);
+        faces[2].top = 0;
+        faces[2].left = 2 * SIZE;
 
         // face 3
-        faces[3].left = pair<int, int>(4, 1);
-        faces[3].right = pair<int, int>(2, 1);
-        faces[3].up = pair<int, int>(1, 0);
-        faces[3].down = pair<int, int>(5, 0);
+        faces[3].dirs[0] = pair<int, int>(2, 1);
+        faces[3].dirs[1] = pair<int, int>(5, 0);
+        faces[3].dirs[2] = pair<int, int>(4, 1);
+        faces[3].dirs[3] = pair<int, int>(1, 0);
+        faces[3].top = SIZE;
+        faces[3].left = SIZE;
 
         // face 4
-        faces[4].left = pair<int, int>(1, 2);
-        faces[4].right = pair<int, int>(5, 0);
-        faces[4].up = pair<int, int>(3, 3);
-        faces[4].down = pair<int, int>(6, 0);
+        faces[4].dirs[0] = pair<int, int>(5, 0);
+        faces[4].dirs[1] = pair<int, int>(6, 0);
+        faces[4].dirs[2] = pair<int, int>(1, 2);
+        faces[4].dirs[3] = pair<int, int>(3, 3);
+        faces[4].top = 2 * SIZE;
+        faces[4].left = 0;
 
         // face 5
-        faces[5].left = pair<int, int>(4, 0);
-        faces[5].right = pair<int, int>(2, 2);
-        faces[5].up = pair<int, int>(3, 0);
-        faces[5].down = pair<int, int>(6, 1);
+        faces[5].dirs[0] = pair<int, int>(2, 2);
+        faces[5].dirs[1] = pair<int, int>(6, 3);
+        faces[5].dirs[2] = pair<int, int>(4, 0);
+        faces[5].dirs[3] = pair<int, int>(3, 0);
+        faces[5].top = 2 * SIZE;
+        faces[5].left = SIZE;
 
         // face 6
-        faces[6].left = pair<int, int>(1, 1);
-        faces[6].right = pair<int, int>(5, 1);
-        faces[6].up = pair<int, int>(4, 0);
-        faces[6].down = pair<int, int>(2, 0);
+        faces[6].dirs[0] = pair<int, int>(5, 1);
+        faces[6].dirs[1] = pair<int, int>(2, 0);
+        faces[6].dirs[2] = pair<int, int>(1, 1);
+        faces[6].dirs[3] = pair<int, int>(4, 0);
+        faces[6].top = 3 * SIZE;
+        faces[6].left = 0;
     }
 
     // parse input
     string line;
     int cur_face;
-    for (int row = 0; row < 200; row++)
+    for (int row = 0; row < 4 * SIZE; row++)
     {
         getline(cin, line);
-        if (row >= 0 && row < 50)
+        if (row >= 0 && row < SIZE)
         {
             cur_face = 1;
-            for (int col = 50; col < 150; col++)
+            for (int col = SIZE; col < 3 * SIZE; col++)
             {
-                if (col == 100)
+                if (col == 2 * SIZE)
                 {
                     cur_face += 1;
                 }
-                faces[cur_face].grid[row % 50][col % 50] = line[col];
+                faces[cur_face].grid[row % SIZE][col % SIZE] = line[col];
             }
         }
-        else if (row >= 50 && row < 100)
+        else if (row >= SIZE && row < 2 * SIZE)
         {
             cur_face = 3;
-            for (int col = 50; col < 100; col++)
+            for (int col = SIZE; col < 2 * SIZE; col++)
             {
-                faces[cur_face].grid[row % 50][col % 50] = line[col];
+                faces[cur_face].grid[row % SIZE][col % SIZE] = line[col];
             }
         }
-        else if (row >= 100 && row < 150)
+        else if (row >= 2 * SIZE && row < 3 * SIZE)
         {
             cur_face = 4;
-            for (int col = 0; col < 100; col++)
+            for (int col = 0; col < 2 * SIZE; col++)
             {
-                if (col == 50)
+                if (col == SIZE)
                 {
                     cur_face += 1;
                 }
-                faces[cur_face].grid[row % 50][col % 50] = line[col];
+                faces[cur_face].grid[row % SIZE][col % SIZE] = line[col];
             }
         }
-        else if (row >= 150 && row < 200)
+        else if (row >= 3 * SIZE && row < 4 * SIZE)
         {
             cur_face = 6;
-            for (int col = 0; col < 50; col++)
+            for (int col = 0; col < SIZE; col++)
             {
-                faces[cur_face].grid[row % 50][col % 50] = line[col];
+                faces[cur_face].grid[row % SIZE][col % SIZE] = line[col];
             }
         }
     }
@@ -195,20 +214,20 @@ int main()
     int x = 0;
     int y = 0;
     int face = 1;
-    int orient = 0;
     int d = 0;
-    char grid[50][50];
+    char grid[SIZE][SIZE];
     cp_grid(faces[1].grid, grid);
     while (!steps.empty())
     {
-        break;
         int step = steps.front();
         steps.pop();
+        // cout << "\nface: " << face << " (x,y): " << x << ", " << y << " dir: " << d << " steps: " << step << "\n";
 
         int new_x = x;
         int new_y = y;
-        pair<int, int> new_face;
-        char next_grid[50][50];
+        int new_face = face;
+        int new_orient = 0;
+        int new_d = d;
         // current direction:
         // 0: right
         // 1: down
@@ -219,28 +238,72 @@ int main()
             if (d == 0)
             {
                 new_x = x + 1;
-                new_face = faces[face].right;
             }
             else if (d == 1)
             {
                 new_y = y + 1;
-                new_face = faces[face].down;
             }
             else if (d == 2)
             {
                 new_x = x - 1;
-                new_face = faces[face].left;
             }
             else if (d == 3)
             {
                 new_y = y - 1;
-                new_face = faces[face].up;
             }
 
-            if (x >= 50 || x < 0 || y >= 50 || y < 0)
+            if (new_x >= SIZE || new_x < 0 || new_y >= SIZE || new_y < 0)
             {
-                cp_grid(faces[new_face.first].grid, next_grid);
+                // cout << "  overshot at (x,y): " << new_x << ", " << new_y << " dir: " << new_d << "\n";
+                new_x = (new_x + SIZE) % SIZE;
+                new_y = (new_y + SIZE) % SIZE;
+                new_orient = faces[face].dirs[d].second;
+                pair<int, int> next = rotate_coords(pair<int, int>(new_x, new_y), new_orient);
+                new_x = next.first;
+                new_y = next.second;
+                new_d = (d + (4 - new_orient)) % 4;
+                new_face = faces[face].dirs[d].first;
+                // cout << "  changing face to " << new_face << ", (x,y): " << new_x << ", " << new_y << " dir: " << new_d << "\n";
+            }
+
+            if (faces[new_face].grid[new_y][new_x] == '#')
+            {
+                // cout << "found wall at face: " << new_face << " (x,y): " << x << ", " << y << "\n";
+                break;
+            }
+            else
+            {
+                x = new_x;
+                y = new_y;
+                d = new_d;
+                face = new_face;
+            }
+        }
+
+        if (!dir.empty())
+        {
+            string next_d = dir.front();
+            dir.pop();
+
+            if (next_d == "L")
+            {
+                d -= 1;
+                if (d < 0)
+                {
+                    d = 3;
+                }
+            }
+            else
+            {
+                d = (d + 1) % 4;
             }
         }
     }
+
+    cout << "final x: " << x << "\n";
+    cout << "final y: " << y << "\n";
+    cout << "final d: " << d << "\n";
+    cout << "final face: " << face << "\n\n";
+    int password = 1000 * ((y + faces[face].top) + 1) + 4 * ((x + faces[face].left) + 1) + d;
+    cout << "password: " << password << "\n\n";
 }

@@ -215,8 +215,6 @@ int main()
     int y = 0;
     int face = 1;
     int d = 0;
-    char grid[SIZE][SIZE];
-    cp_grid(faces[1].grid, grid);
     while (!steps.empty())
     {
         int step = steps.front();
@@ -235,6 +233,7 @@ int main()
         // 3: up
         for (int i = 0; i < step; i++)
         {
+            // move one step in the current direction
             if (d == 0)
             {
                 new_x = x + 1;
@@ -252,25 +251,39 @@ int main()
                 new_y = y - 1;
             }
 
+            // check if this next step will exceed the grid
+            // if so, find the actual next position and face of this next step
             if (new_x >= SIZE || new_x < 0 || new_y >= SIZE || new_y < 0)
             {
                 // cout << "  overshot at (x,y): " << new_x << ", " << new_y << " dir: " << new_d << "\n";
+
+                // find the coordinates if wrapping normally
                 new_x = (new_x + SIZE) % SIZE;
                 new_y = (new_y + SIZE) % SIZE;
+
+                // coordinates are always taken relative to the face
+                // right-side-up.
+                // adjacent faces may not be right-side-up, so we must rotate
+                // the coordinates accordingly
                 new_orient = faces[face].dirs[d].second;
                 pair<int, int> next = rotate_coords(pair<int, int>(new_x, new_y), new_orient);
+
+                // get the new coordinates, face, and direction
                 new_x = next.first;
                 new_y = next.second;
                 new_d = (d + (4 - new_orient)) % 4;
                 new_face = faces[face].dirs[d].first;
+
                 // cout << "  changing face to " << new_face << ", (x,y): " << new_x << ", " << new_y << " dir: " << new_d << "\n";
             }
 
+            // stop moving if the next step leads to a wall
             if (faces[new_face].grid[new_y][new_x] == '#')
             {
                 // cout << "found wall at face: " << new_face << " (x,y): " << x << ", " << y << "\n";
                 break;
             }
+            // move to the next step
             else
             {
                 x = new_x;
@@ -280,6 +293,7 @@ int main()
             }
         }
 
+        // finished moving straight, time to change direction
         if (!dir.empty())
         {
             string next_d = dir.front();
@@ -304,6 +318,9 @@ int main()
     cout << "final y: " << y << "\n";
     cout << "final d: " << d << "\n";
     cout << "final face: " << face << "\n\n";
+    // we've already hard-coded the locations of the faces on the map
+    // given a set of coordinates (x,y) on a certain face,
+    // we can compute its location on the actual map
     int password = 1000 * ((y + faces[face].top) + 1) + 4 * ((x + faces[face].left) + 1) + d;
     cout << "password: " << password << "\n\n";
 }

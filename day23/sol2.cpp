@@ -12,15 +12,18 @@ struct Elf
     pair<int, int> next;
 };
 
+// directions
+// 0,1,2,3 = north, south, east, west
+deque<int> directions = {0, 1, 2, 3};
+
+// comparator for sorting
 bool cmp(pair<pair<int, int>, int> a, pair<pair<int, int>, int> b)
 {
     return a.first < b.first;
 }
 
-// directions
-// 0,1,2,3 = north, south, east, west
-deque<int> directions = {0, 1, 2, 3};
-
+// debug function
+// displays the positions in v on a grid
 void map_vec(vector<pair<int, int>> v)
 {
     char grid[2 * PAD + SIZE][2 * PAD + SIZE];
@@ -72,20 +75,10 @@ int main()
         }
     }
 
-    // print current direction
-    // vector<pair<int, int>> es;
-    // for (Elf ex : elves)
-    // {
-    //     es.push_back(ex.pos);
-    // }
-    // map_vec(es);
-    // cout << "\n";
-    // es.clear();
-
     // move elves
+    vector<pair<pair<int, int>, int>> next_moves;
     int step = 0;
     bool term = false;
-    vector<pair<pair<int, int>, int>> next_moves;
     while (!term)
     {
         term = true;
@@ -111,10 +104,13 @@ int main()
                     }
                 }
             }
-            // cout << "elf " << i << " at " << elf->pos.first << ", " << elf->pos.second << " ";
+
+            // check if elf has other elves adjacent to it
+            // if no adj elves, we can skip moving
             if (has_adjacent)
             {
                 term = false;
+                // suggest a direction to move in
                 for (int dir : directions)
                 {
                     bool can_move = true;
@@ -132,7 +128,6 @@ int main()
                         }
                         if (can_move)
                         {
-                            // cout << "is moving north\n";
                             next_move.first -= 1;
                             break;
                         }
@@ -151,7 +146,6 @@ int main()
                         }
                         if (can_move)
                         {
-                            // cout << "is moving south\n";
                             next_move.first += 1;
                             break;
                         }
@@ -170,7 +164,6 @@ int main()
                         }
                         if (can_move)
                         {
-                            // cout << "is moving east\n";
                             next_move.second += 1;
                             break;
                         }
@@ -189,23 +182,16 @@ int main()
                         }
                         if (can_move)
                         {
-                            // cout << "is moving west\n";
                             next_move.second -= 1;
                             break;
                         }
                         continue;
                     }
                 }
-                // if (elf->pos == next_move)
-                // {
-                //     cout << "is not moving\n";
-                // }
             }
-            // else
-            // {
-            //     cout << "has no adj elves\n";
-            // }
 
+            // note down the coordinates of the elf's next move
+            // based on the direction they suggest
             elf->next = next_move;
             next_moves.push_back(pair<pair<int, int>, int>(next_move, i));
         }
@@ -219,7 +205,6 @@ int main()
             {
                 while (next_moves[i].first == next_moves[i + 1].first && i < next_moves.size() - 1)
                 {
-                    // cout << "elf " << next_moves[i].second << " has a move conflict going to (" << next_moves[i].first.first << ", " << next_moves[i].first.second << ")\n";
                     i += 1;
                 }
             }
@@ -232,16 +217,6 @@ int main()
                 elves[elf_id].pos = elves[elf_id].next;
             }
         }
-
-        // print next direction
-        // cout << "step " << step + 1 << "\n";
-        // for (Elf ex : elves)
-        // {
-        //     es.push_back(ex.pos);
-        // }
-        // map_vec(es);
-        // cout << "\n";
-        // es.clear();
 
         // cycle directions
         directions.push_back(directions.front());

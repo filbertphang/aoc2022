@@ -12,15 +12,18 @@ struct Elf
     pair<int, int> next;
 };
 
+// directions
+// 0,1,2,3 = north, south, east, west
+deque<int> directions = {0, 1, 2, 3};
+
+// comparator for sorting
 bool cmp(pair<pair<int, int>, int> a, pair<pair<int, int>, int> b)
 {
     return a.first < b.first;
 }
 
-// directions
-// 0,1,2,3 = north, south, east, west
-deque<int> directions = {0, 1, 2, 3};
-
+// debug function
+// displays the positions in v on a grid
 void map_vec(vector<pair<int, int>> v)
 {
     char grid[2 * PAD + SIZE][2 * PAD + SIZE];
@@ -109,8 +112,12 @@ int main()
                 }
             }
             // cout << "elf " << i << " at " << elf->pos.first << ", " << elf->pos.second << " ";
+
+            // check if elf has other elves adjacent to it
+            // if no adj elves, we can skip moving
             if (has_adjacent)
             {
+                // suggest a direction to move in
                 for (int dir : directions)
                 {
                     bool can_move = true;
@@ -202,6 +209,8 @@ int main()
             //     cout << "has no adj elves\n";
             // }
 
+            // note down the coordinates of the elf's next move
+            // based on the direction they suggest
             elf->next = next_move;
             next_moves.push_back(pair<pair<int, int>, int>(next_move, i));
         }
